@@ -15,6 +15,7 @@
         'data/cron.xml',
         'views/subscription.xml',
     ],
+    'license': 'LGPL-3',
     'demo': [
     ],
 }
