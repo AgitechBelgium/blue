@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<record id="sale_subscription_dg_form_view" model="ir.ui.view">
+		<field name="name">sale.subscription.order.dg.form</field>
+		<field name="model">sale.order</field>
+		<field name="inherit_id" ref="sale_subscription.sale_subscription_order_view_form"/>
+		<field name="arch" type="xml">
+			<field name="payment_token_id" position="after">
+				<field name="next_quarterly_invoice_date" string="Next Quarterly Invoice Date"/>
+			</field>
+		</field>
+	</record>
+</odoo>
