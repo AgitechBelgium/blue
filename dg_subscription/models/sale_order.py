@@ -25,7 +25,8 @@ class Order(models.Model):
 	next_quarterly_invoice_date = fields.Date(string="Next Date", default=fields.Date.today)
 
 	def action_invoice_subscription(self):
-		account_move = self._create_recurring_invoice()
+		quarter_first_date, quarter_last_date = get_current_quarter_dates()
+		account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date)
 		for rec in self:
 			for move in account_move:
 				move.invoice_date = rec.next_quarterly_invoice_date
@@ -68,6 +69,7 @@ class Order(models.Model):
 				ol.qty_invoiced = sum(ol.invoice_lines.mapped('quantity'))
 			order.next_quarterly_invoice_date = quarter_last_date + timedelta(days=1)
 			self.env.cr.commit()
+			return invoices
 		except Exception as e:
 			raise UserError(f"Error returned for order: {self.name}\n{e}")
 
