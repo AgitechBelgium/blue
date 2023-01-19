@@ -5,6 +5,7 @@ from odoo.exceptions import UserError
 import pytz
 
 
+
 def get_current_quarter_dates():
 	current_date = datetime.now()
 	current_quarter = round((current_date.month - 1) / 3 + 1)
