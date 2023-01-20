@@ -28,7 +28,9 @@ class Order(models.Model):
 		account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=False)
 		for rec in self:
 			for move in account_move:
-				move.invoice_date = rec.next_quarterly_invoice_date
+				move.sudo().with_context(check_move_validity=False).write({
+					'invoice_date': rec.next_quarterly_invoice_date
+				})
 				rec.next_quarterly_invoice_date = (rec.next_quarterly_invoice_date or rec.date_order) + relativedelta(months=3)
 		if account_move:
 			return self.action_view_invoice()
@@ -56,26 +58,23 @@ class Order(models.Model):
 		return super(Order, self).set_close()
 
 	def create_quarterly_invoice(self, order, quarter_first_date, quarter_last_date, auto_commit=False):
+		"""
+
+		:param order:
+		:param quarter_first_date:
+		:param quarter_last_date:
+		:param auto_commit:
+		:return:
+		"""
 		try:
-			remaining_invoice_div = 4 - len(self.invoice_ids)
-			invoices = order.sudo()._create_invoices()
+			invoices = order.sudo().with_context(from_subscription_invoice=True)._create_invoices()
 			if auto_commit:
 				self.env.cr.commit()
-			invoices.sudo().write({'invoice_date': quarter_first_date})
+			invoices.sudo().with_context(check_move_validity=False).write({'invoice_date': quarter_first_date})
 			if auto_commit:
 				self.env.cr.commit()
-			invoice_lines = invoices.mapped('invoice_line_ids').sorted('sequence')
-			for invoice_line in invoice_lines:
-				invoice_line.sudo().with_context(check_move_validity=False).write({'quantity': invoice_line.quantity / remaining_invoice_div})
-				if auto_commit:
-					self.env.cr.commit()
-				break
-
-			for extra_line in invoice_lines[1::]:
-				qty_to_invoiced = extra_line.sale_line_ids and (extra_line.sale_line_ids[0].product_uom_qty - extra_line.sale_line_ids[0].qty_invoiced) or 0
-				if qty_to_invoiced <= 0:
-					extra_line.sudo().with_context(check_move_validity=False).unlink()
-
+			if auto_commit:
+				self.env.cr.commit()
 			for ol in order.order_line:
 				ol.qty_invoiced = sum(ol.invoice_lines.mapped('quantity'))
 				if auto_commit:
