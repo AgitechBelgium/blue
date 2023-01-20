@@ -5,7 +5,6 @@ from odoo.exceptions import UserError
 import pytz
 
 
-
 def get_current_quarter_dates():
 	current_date = datetime.now()
 	current_quarter = round((current_date.month - 1) / 3 + 1)
@@ -26,7 +25,7 @@ class Order(models.Model):
 
 	def action_invoice_subscription(self):
 		quarter_first_date, quarter_last_date = get_current_quarter_dates()
-		account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date)
+		account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=False)
 		for rec in self:
 			for move in account_move:
 				move.invoice_date = rec.next_quarterly_invoice_date
@@ -56,19 +55,34 @@ class Order(models.Model):
 				self.create_quarterly_invoice(order, quarter_first_date=quarter_start, quarter_last_date=quarter_end)
 		return super(Order, self).set_close()
 
-	def create_quarterly_invoice(self, order, quarter_first_date, quarter_last_date):
+	def create_quarterly_invoice(self, order, quarter_first_date, quarter_last_date, auto_commit=False):
 		try:
+			remaining_invoice_div = 4 - len(self.invoice_ids)
 			invoices = order.sudo()._create_invoices()
-			self.env.cr.commit()
-			invoices.sudo().write({'invoice_date': quarter_first_date})
-			self.env.cr.commit()
-			for invoice_line in invoices.mapped('invoice_line_ids'):
-				invoice_line.sudo().write({'quantity': invoice_line.quantity / 4})
+			if auto_commit:
 				self.env.cr.commit()
+			invoices.sudo().write({'invoice_date': quarter_first_date})
+			if auto_commit:
+				self.env.cr.commit()
+			invoice_lines = invoices.mapped('invoice_line_ids').sorted('sequence')
+			for invoice_line in invoice_lines:
+				invoice_line.sudo().with_context(check_move_validity=False).write({'quantity': invoice_line.quantity / remaining_invoice_div})
+				if auto_commit:
+					self.env.cr.commit()
+				break
+
+			for extra_line in invoice_lines[1::]:
+				qty_to_invoiced = extra_line.sale_line_ids and (extra_line.sale_line_ids[0].product_uom_qty - extra_line.sale_line_ids[0].qty_invoiced) or 0
+				if qty_to_invoiced <= 0:
+					extra_line.sudo().with_context(check_move_validity=False).unlink()
+
 			for ol in order.order_line:
 				ol.qty_invoiced = sum(ol.invoice_lines.mapped('quantity'))
+				if auto_commit:
+					self.env.cr.commit()
 			order.next_quarterly_invoice_date = quarter_last_date + timedelta(days=1)
-			self.env.cr.commit()
+			if auto_commit:
+				self.env.cr.commit()
 			return invoices
 		except Exception as e:
 			raise UserError(f"Error returned for order: {self.name}\n{e}")
@@ -93,5 +107,5 @@ class Order(models.Model):
 			# if order.invoice_ids.filtered(lambda x: quarter_first_date <= x.invoice_date <= quarter_last_date):
 			# 	continue
 			# else:
-			self.create_quarterly_invoice(order=order, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date)
+			self.create_quarterly_invoice(order=order, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=True)
 			self.env.cr.commit()

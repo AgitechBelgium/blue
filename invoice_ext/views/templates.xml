@@ -8,7 +8,7 @@
             </xpath>
 			<xpath expr="//div[hasclass('zero_min_height')]" position="replace">
 				<div t-if="company.logo or company.report_header" class="row zero_min_height">
-					<t t-if="o._name == 'account.move'">
+					<t t-if="o and o._name == 'account.move'">
 					</t>
 					<t t-else="">
 						<div class="col-12">
