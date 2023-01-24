@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+  <t t-name="FidManagerSystray">
+      <div class="new_icon">
+             <div class="icon_div">
+                 <div class="toggle-icon" role="button">
+                     <a href="#" class="icon" title="FID Manager">
+                         <img class="resize" id="open_fid_manager" style="height: auto;width: 45px;" src="web_fid_manager/static/img/LogoFid.png"/>
+                     </a>
+                 </div>
+             </div>
+      </div>
+  </t>
+</templates>

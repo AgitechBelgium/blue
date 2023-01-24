@@ -2,7 +2,50 @@
 <odoo>
     <data>
         <template id="report_invoice_facture_diego_document">
-            <t t-call="web.external_layout">
+            <t t-call="web.basic_layout">
+                <style>
+                    body {
+                        font-size: 12px !important;
+                    }
+                </style>
+                <t t-if="not o" t-set="o" t-value="doc"/>
+
+                <t t-if="not company">
+                    <!-- Multicompany -->
+                    <t t-if="company_id">
+                        <t t-set="company" t-value="company_id"/>
+                    </t>
+                    <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
+                        <t t-set="company" t-value="o.company_id.sudo()"/>
+                    </t>
+                    <t t-else="else">
+                        <t t-set="company" t-value="res_company"/>
+                    </t>
+                </t>
+                <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
+                    <div class="row">
+                        <div class="col-3 mb4">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 100px;"
+                                 alt="Logo"/>
+                        </div>
+                        <div class="col-9 text-end" style="margin-top:22px;" t-field="company.report_header"
+                             name="moto"/>
+                    </div>
+                    <div t-if="company.logo or company.report_header" class="row zero_min_height">
+
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-6" name="company_address">
+                            <span t-if="company.company_details" t-field="company.company_details"></span>
+                            <span t-else="" t-field="company.partner_id"
+                                  t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                        </div>
+                    </div>
+                </div>
+
+
                 <t t-set="o" t-value="o.with_context(lang=lang)"/>
                 <t t-set="forced_vat"
                    t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
@@ -60,66 +103,104 @@
                     </t>
                 </div>
 
+                <div>
+                    <!-- This div ensures that the address is not cropped by the header. -->
+                    <t t-set="colclass" t-value="('col-sm-5' if report_type == 'html' else 'col-5') + ' ms-auto'"/>
+                    <t t-if="address">
+                        <div class="address row">
+                            <t t-if="information_block">
+                                <t t-set="colclass" t-value="'col-5 offset-1'"/>
+                                <div name="information_block" class="col-6">
+                                    <t t-out="information_block"/>
+                                </div>
+                            </t>
+                            <div name="address" t-att-class="colclass">
+                                <t t-esc="address"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
 
-                <div class="mt-5">
+                <div>
                     <div class="page">
-                        <div id="partner_informations" class="mt-4 mb-4">
-
-                            <div class="mb-2 row">
-                                <span class="col-1">Tel:</span>
-                                <span class="col-11" t-field="o.company_id.phone"/>
-                            </div>
-                            <div class="mb-2 row">
-                                <span class="col-1">E-mail:</span>
-                                <span class="col-11" t-field="o.company_id.email"/>
-                            </div>
-                            <div class="mb-2 row">
-                                <span class="col-1">Banque:</span>
-                                <span class="col-11" t-field="o.partner_id.bank_ids.bank_id.name"/>
-                            </div>
-                            <div class="mb-2 row">
-                                <span class="col-1">IBAN:</span>
-                                <span class="col-11" t-field="o.partner_id.bank_ids.acc_number"/>
-                            </div>
-                            <div class="mb-2 row">
-                                <span class="col-1">BIC:</span>
-                                <span class="col-11" t-field="o.partner_id.bank_ids.bank_id.bic"/>
-                            </div>
-                            <div class="mb-2 row">
-                                <span class="col-1">N&#176; TVA:</span>
-                                <span class="col-11" t-field="o.company_id.vat"/>
-                            </div>
+                        <div id="partner_informations" class="mt-4">
+                            <table class="mt-3 table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td class="col-4">Tel</td><td><span t-field="o.company_id.phone"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4">E-mail</td><td><span t-field="o.company_id.phone"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4">Banque</td><td><span t-field="o.company_id.email"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4">IBAN</td><td><span t-field="o.partner_id.bank_ids.bank_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4">BIC</td><td><span t-field="o.partner_id.bank_ids.acc_number"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4">N&#176; TVA</td><td><span t-field="o.partner_id.bank_ids.bank_id.bic"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="row">
+                        <div class="row mb-4 mt-n5" style="margin-top: -40px;">
                             <div class="col-2 ms-auto">
-                                <h2>
+                                <h1 class="fw-bold">
                                     Facture
-                                </h2>
+                                </h1>
                             </div>
                         </div>
 
-                        <div id="informations" class="row mt-4 mb-4">
-                            <div class="col-auto col-2 mw-100 mb-2">
-                                <strong>Votre n&#176; TVA:</strong>
-                                <p class="m-0" t-field="o.partner_id.vat"/>
-                            </div>
-                            <div class="col-auto col-4 mw-100 mb-2">
-                                <strong>Communication structurée:</strong>
-                                <!--                                <p class="m-0" t-field="o.invoice_origin"/>-->
-                            </div>
-                            <div class="col-auto col-2 mw-100 mb-2">
-                                <strong>Date facture:</strong>
-                                <p class="m-0" t-field="o.invoice_date"/>
-                            </div>
-                            <div class="col-auto col-2 mw-100 mb-2">
-                                <strong>Echéance:</strong>
-                                <p class="m-0" t-field="o.invoice_date_due"/>
-                            </div>
-                            <div class="col-auto col-2 mw-100 mb-2">
-                                <strong>N&#176; facture:</strong>
-                                <p class="m-0" t-field="o.name"/>
-                            </div>
-                        </div>
+
+                        <table class="mt-3 table table-sm o_main_table table-borderless border-bott">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold" style="border-bottom:1px solid black;">
+                                        <strong>Votre n&#176; TVA:</strong>
+                                    </td>
+                                    <td class="fw-bold" style="border-bottom:1px solid black;">
+                                        <strong>Communication structurée:
+                                        </strong>
+                                    </td>
+                                    <td class="col-1">
+
+                                    </td>
+                                    <td class="fw-bold" style="border-bottom:1px solid black;">
+                                        <strong>Date facture:</strong>
+                                    </td>
+                                    <td class="fw-bold" style="border-bottom:1px solid black;">
+                                        <strong>Echéance:</strong>
+                                    </td>
+                                    <td class="fw-bold" style="border-bottom:1px solid black;">
+                                        <strong>N&#176; facture:</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="m-0" t-field="o.partner_id.vat"/>
+                                    </td>
+                                    <td>
+                                        <p class="m-0" t-field="o.partner_id.phone"/>
+                                    </td>
+                                    <td class="col-1">
+
+                                    </td>
+                                    <td>
+                                        <p class="m-0" t-field="o.invoice_date"/>
+                                    </td>
+                                    <td>
+                                        <p class="m-0" t-field="o.invoice_date_due"/>
+                                    </td>
+                                    <td>
+                                        <p class="m-0" t-field="o.name"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
 
                         <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
@@ -131,27 +212,27 @@
                                 <thead style="border: none;">
                                     <tr style="border: none;">
                                         <th name="th_product" class="text-start">
-                                            <span>Product</span>
+                                            <span class="fw-bold">Product</span>
                                         </th>
                                         <th name="th_description" class="text-start">
-                                            <span>Description</span>
+                                            <span class="fw-bold">Description</span>
                                         </th>
                                         <th name="th_quantity" class="text-end">
-                                            <span>Quantity</span>
+                                            <span class="fw-bold">Quantity</span>
                                         </th>
-                                        <th name="th_priceunit"
+                                        <th class="fw-bold" name="th_priceunit"
                                             t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                             <span>Unit Price</span>
                                         </th>
-                                        <th name="th_price_unit" t-if="display_discount"
+                                        <th class="fw-bold" name="th_price_unit" t-if="display_discount"
                                             t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                             <span>Disc.%</span>
                                         </th>
-                                        <th name="th_taxes"
+                                        <th class="fw-bold" name="th_taxes"
                                             t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                             <span>Taxes</span>
                                         </th>
-                                        <th name="th_subtotal" class="text-end">
+                                        <th name="th_subtotal" class="text-end fw-bold">
                                             <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
                                             <span groups="account.group_show_line_subtotals_tax_included">Total Price
                                             </span>
@@ -169,7 +250,8 @@
                                            groups="account.group_show_line_subtotals_tax_excluded"/>
                                         <t t-set="current_subtotal" t-value="current_subtotal + line.price_total"
                                            groups="account.group_show_line_subtotals_tax_included"/>
-                                        <t t-set="total_amount_discount" t-value="total_amount_discount + ((line.quantity*line.price_unit*line.discount)/100)"/>
+                                        <t t-set="total_amount_discount"
+                                           t-value="total_amount_discount + ((line.quantity*line.price_unit*line.discount)/100)"/>
 
                                         <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                                             <t t-if="line.display_type == 'product'"
@@ -231,7 +313,9 @@
                                     </t>
                                 </tbody>
                             </table>
-
+                            <br/>
+                            <br/>
+                            <br/>
                             <div class="clearfix mb-4">
                                 <div id="total" class="row">
 
@@ -246,15 +330,19 @@
                                                         <tbody style="border: none;">
                                                             <tr style="border: none;">
                                                                 <td style="border: none;">Pourcentage Escompte</td>
-                                                                <td style="border: none;" t-esc="total_percent_discount" class="text-start"/>
+                                                                <td style="border: none;" t-esc="total_percent_discount"
+                                                                    class="text-start"/>
 
                                                             </tr>
                                                             <tr style="border: none;">
                                                                 <td style="border: none;">Montant Escompte</td>
-                                                                <td style="border: none;" t-esc="total_amount_discount" class="text-start"/>
+                                                                <td style="border: none;" t-esc="total_amount_discount"
+                                                                    class="text-start"/>
                                                             </tr>
                                                             <tr style="border: none;">
-                                                                <td style="border: none;">Montant à payer si paiement avant le</td>
+                                                                <td style="border: none;">Montant à payer si paiement
+                                                                    avant le
+                                                                </td>
                                                                 <!--  <td t-esc="term.get('date')" class="text-start"/>-->
                                                             </tr>
                                                         </tbody>
@@ -317,23 +405,14 @@
 
 
                         </div>
+                        <br/>
                         <div style="border:1px solid;">
                             <div class="text-center" t-field="o.invoice_payment_term_id.note" name="payment_term"/>
                         </div>
 
 
                     </div>
-
-
-                    <!--                    <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference"-->
-                    <!--                       name="payment_communication" class="mt-4">-->
-                    <!--                        Please use the following communication for your payment :-->
-                    <!--                        <b>-->
-                    <!--                            <span t-field="o.payment_reference"/>-->
-                    <!--                        </b>-->
-                    <!--                    </p>-->
-
-                    <p class="mt-4" style="page-break-inside: avoid;">
+                    <p class="mt-1 pt-5" style="page-break-inside: avoid;">
                         Extrait de la lettre de mission:
                         "(...) Article 7.2. Délai et modalités de paiement
                         Les honoraires sont à payer dans les 15 jours civils à compter du jour qui suit la date d'envoi
