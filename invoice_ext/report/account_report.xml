@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="account_invoices_facture_diego" model="ir.actions.report">
-            <field name="name">Facture diego</field>
-            <field name="model">account.move</field>
-            <field name="report_type">qweb-pdf</field>
+
+        <record id="account.account_invoices" model="ir.actions.report">
             <field name="report_name">invoice_ext.report_invoice_facture_diego</field>
             <field name="report_file">invoice_ext.report_invoice_facture_diego</field>
-            <field name="print_report_name">('facture diego_' + object.name)</field>
-            <field name="binding_model_id" ref="account.model_account_move"/>
-            <field name="binding_type">report</field>
         </record>
     </data>
 </odoo>
