@@ -8,6 +8,25 @@
 			<field name="payment_token_id" position="after">
 				<field name="next_quarterly_invoice_date" string="Next Quarterly Invoice Date"/>
 			</field>
+			<button id="create_recurring_invoice_primary" position="attributes">
+				<attribute name="attrs">{'invisible': ['|', '|', ('show_rec_invoice_button', '=', False), ('invoice_count', '>', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
+			</button>
+			<button id="create_recurring_invoice" position="attributes">
+				<attribute name="attrs">{'invisible': ['|', '|', ('show_rec_invoice_button', '=', False),  ('invoice_count', '=', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
+			</button>
+			<button id="create_recurring_invoice" position="after">
+				<button name="action_provision_invoice_subscription" string="Provision Invoice"
+                        id="create_provision_recurring_invoice" class="btn-primary" type="object" data-hotkey="p"
+                         attrs="{'invisible': ['|', ('state', 'not in', ['sale']), ('invoice_status', '=', 'invoiced')]}"
+                />
+			</button>
+			<xpath expr="//notebook//page[@name='order_lines']//group[@name='note_group']//group[@name='sale_total']" position="before">
+				<group class="oe_subtotal_footer" colspan="2" name="time_total">
+                    <field name="total_tasks" widget="monetary" colspan="2" readonly="1"/>
+                    <field name="total_invoiced_hours" widget="monetary" colspan="2" readonly="1"/>
+                    <field name="left_to_invoice_hours" widget="monetary" colspan="2" readonly="1"/>
+                </group>
+			</xpath>
 		</field>
 	</record>
 </odoo>

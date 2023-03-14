@@ -6,6 +6,25 @@ from odoo import fields, models, api, _, Command
 class SaleOrderLine(models.Model):
 	_inherit = "sale.order.line"
 
+	def _convert_to_tax_base_line_dict_with_invoiced_qty(self):
+		""" Convert the current record to a dictionary in order to use the generic taxes computation method
+		defined on account.tax with quantity invoiced.
+
+		:return: A python dictionary.
+		"""
+		self.ensure_one()
+		return self.env['account.tax']._convert_to_tax_base_line_dict(
+			self,
+			partner=self.order_id.partner_id,
+			currency=self.order_id.currency_id,
+			product=self.product_id,
+			taxes=self.tax_id,
+			price_unit=self.price_unit,
+			quantity=self.qty_invoiced,
+			discount=self.discount,
+			price_subtotal=self.price_subtotal,
+		)
+
 	def _prepare_invoice_line(self, **optional_values):
 		"""Prepare the values to create the new invoice line for a sales order line.
 
@@ -20,7 +39,7 @@ class SaleOrderLine(models.Model):
 			'name': self.name,
 			'product_id': self.product_id.id,
 			'product_uom_id': self.product_uom.id,
-			'quantity': self.product_uom_qty/4 if first_product else self.qty_to_invoice,
+			'quantity': self.product_uom_qty/4 if first_product and not self._context.get('force_super', False) else (self.product_uom_qty - self.qty_invoiced),
 			'discount': self.discount,
 			'price_unit': self.price_unit,
 			'tax_ids': [Command.set(self.tax_id.ids)],
@@ -39,6 +58,10 @@ class SaleOrderLine(models.Model):
 			res.update(optional_values)
 		if self.display_type:
 			res['account_id'] = False
+		if self.order_id.is_subscription:
+			res.update({
+				'subscription_id': self.order_id.id,
+			})
 		return res
 
 	def _get_subscription_qty_invoiced(self, last_invoice_date=None, next_invoice_date=None):
