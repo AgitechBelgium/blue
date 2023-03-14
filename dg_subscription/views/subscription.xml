@@ -22,7 +22,7 @@
 			</button>
 			<xpath expr="//notebook//page[@name='order_lines']//group[@name='note_group']//group[@name='sale_total']" position="before">
 				<group class="oe_subtotal_footer" colspan="2" name="time_total">
-                    <field name="total_tasks" widget="monetary" colspan="2" readonly="1"/>
+                    <field name="total_tasks" string="Total Time" widget="monetary" colspan="2" readonly="1"/>
                     <field name="total_invoiced_hours" widget="monetary" colspan="2" readonly="1"/>
                     <field name="left_to_invoice_hours" widget="monetary" colspan="2" readonly="1"/>
                 </group>
