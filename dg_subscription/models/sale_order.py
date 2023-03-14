@@ -38,7 +38,7 @@ class Order(models.Model):
 				'product_uom_qty': sum(timesheet_ids.filtered(lambda t: t.so_line.id == sale_line.id).mapped('unit_amount'))
 			})
 
-	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.price_total')
+	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.qty_invoiced', 'order_line.price_total')
 	def _compute_amounts(self):
 		super(Order, self)._compute_amounts()
 
@@ -48,12 +48,12 @@ class Order(models.Model):
 			return totals
 
 		for rec in self:
-			if rec.order_line[1::]:
-				rec.total_tasks = sum(rec.order_line.mapped('price_subtotal'))
+			if rec.order_line:
+				rec.total_tasks = sum(rec.order_line[1::].mapped('price_subtotal'))
 				rec.total_invoiced_hours = sum(rec.order_line.mapped(
 					lambda l: get_totals(l)['amount_untaxed']
 				))
-				rec.left_to_invoice_hours = rec.total_tasks - rec.total_invoiced_hours
+				rec.left_to_invoice_hours = 0 if (rec.total_tasks - rec.total_invoiced_hours) < 0 else (rec.total_tasks - rec.total_invoiced_hours)
 			else:
 				rec.total_tasks = rec.total_invoiced_hours = rec.left_to_invoice_hours = 0
 
@@ -122,6 +122,8 @@ class Order(models.Model):
 					'invoice_date': rec.next_quarterly_invoice_date
 				})
 				rec.next_quarterly_invoice_date = (rec.next_quarterly_invoice_date or rec.date_order) + relativedelta(months=3)
+		# Forcefully computed amounts
+		self._compute_amounts()
 		if account_move:
 			return self.action_view_invoice()
 		else:
