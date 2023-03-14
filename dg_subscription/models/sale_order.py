@@ -26,6 +26,18 @@ class Order(models.Model):
 	total_invoiced_hours = fields.Monetary(string="Total Invoiced", store=True, compute='_compute_amounts', tracking=6)
 	left_to_invoice_hours = fields.Monetary(string="Left To Invoice", store=True, compute='_compute_amounts', tracking=8)
 
+	def subscription_line_qty(self, sale_line_id=False):
+		"""
+		Update quantity on the subscription
+		:return: None
+		"""
+		timesheet_ids = self.filtered('is_subscription').timesheet_ids
+		sale_line_ids = sale_line_id or timesheet_ids.mapped('so_line')
+		for sale_line in sale_line_ids:
+			sale_line.write({
+				'product_uom_qty': sum(timesheet_ids.filtered(lambda t: t.so_line.id == sale_line.id).mapped('unit_amount'))
+			})
+
 	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.price_total')
 	def _compute_amounts(self):
 		super(Order, self)._compute_amounts()
@@ -37,8 +49,8 @@ class Order(models.Model):
 
 		for rec in self:
 			if rec.order_line[1::]:
-				rec.total_tasks = sum(rec.order_line[1::].mapped('price_subtotal'))
-				rec.total_invoiced_hours = sum(rec.order_line[1::].mapped(
+				rec.total_tasks = sum(rec.order_line.mapped('price_subtotal'))
+				rec.total_invoiced_hours = sum(rec.order_line.mapped(
 					lambda l: get_totals(l)['amount_untaxed']
 				))
 				rec.left_to_invoice_hours = rec.total_tasks - rec.total_invoiced_hours

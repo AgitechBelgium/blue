@@ -10,6 +10,7 @@
     'depends': [
         'sale',
         'sale_subscription',
+        'sale_timesheet',
     ],
     'data': [
         'data/cron.xml',
