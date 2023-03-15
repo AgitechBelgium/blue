@@ -84,6 +84,12 @@ class Order(models.Model):
 				self.create_quarterly_invoice(order, quarter_first_date=quarter_start, quarter_last_date=quarter_end)
 		return super(Order, self).set_close()
 
+	def _get_invoiceable_lines(self, final=False):
+		invoiceable_lines = super(Order, self)._get_invoiceable_lines(final)
+		if self._context.get('provision_invoice', False) and invoiceable_lines:
+			invoiceable_lines = invoiceable_lines[0]
+		return invoiceable_lines
+
 	def create_quarterly_invoice(self, order, quarter_first_date, quarter_last_date, auto_commit=False):
 		"""
 
@@ -94,7 +100,7 @@ class Order(models.Model):
 		:return:
 		"""
 		try:
-			invoices = order.sudo().with_context(from_subscription_invoice=True)._create_invoices()
+			invoices = order.sudo().with_context(from_subscription_invoice=True, provision_invoice=True)._create_invoices()
 			if auto_commit:
 				self.env.cr.commit()
 			invoices.sudo().with_context(check_move_validity=False).write({'invoice_date': quarter_first_date})
