@@ -8,6 +8,7 @@
     'version': '16.0.1.0.0',
     'depends': ['base', 'account', 'web', 'base_setup'],
     'data': [
+        'report/report_paperformat.xml',
         'report/account_report.xml',
         'report/report_invoice.xml',
     ],
