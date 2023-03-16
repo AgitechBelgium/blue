@@ -58,6 +58,29 @@ class Order(models.Model):
 				rec.total_tasks = rec.total_invoiced_hours = rec.left_to_invoice_hours = 0
 
 	def action_invoice_subscription(self):
+		if self.is_subscription:
+			manual_invoice = self.env['account.move'].create({
+				'move_type': 'out_invoice',
+				'date': fields.Date.today(),
+				'sale_id': self.id,
+				'invoice_line_ids': [
+					(0, 0, {
+						'name': 'Left To invoice',
+						'quantity': 1.0,
+						'price_unit': self.left_to_invoice_hours,
+						'tax_ids': [(6, 0, [])],
+					}),
+				],
+			})
+			if manual_invoice:
+				for line in self.order_line[1::]:
+					line.invoice_lines = [(4, inv_line_id.id) for inv_line_id in manual_invoice.invoice_line_ids]
+				# Forcefully computed invoiced quantity
+				self.order_line._compute_qty_invoiced()
+				# Forcefully computed invoices, and it's count because of manual invoice creation.
+				self._get_invoiced()
+				return self.action_view_invoice()
+
 		invoices = super(Order, self.with_context(force_super=True)).action_invoice_subscription()
 		for line in self.order_line:
 			line.write({'invoice_status': 'invoiced'})

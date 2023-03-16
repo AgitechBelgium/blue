@@ -6,6 +6,14 @@ from odoo import fields, models, api, _, Command
 class SaleOrderLine(models.Model):
 	_inherit = "sale.order.line"
 
+	@api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity')
+	def _compute_qty_invoiced(self):
+		super(SaleOrderLine, self)._compute_qty_invoiced()
+		for line in self.filtered('order_id.is_subscription'):
+			for invoice_line in line.invoice_lines.filtered(lambda invl: invl.move_id.sale_id.id == line.order_id.id):
+				if invoice_line.move_id.state != 'cancel' or invoice_line.move_id.payment_state == 'invoicing_legacy':
+					line.qty_invoiced = line.product_uom_qty
+
 	def _convert_to_tax_base_line_dict_with_invoiced_qty(self):
 		""" Convert the current record to a dictionary in order to use the generic taxes computation method
 		defined on account.tax with quantity invoiced.
