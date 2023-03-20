@@ -41,25 +41,19 @@ class Order(models.Model):
 	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.qty_invoiced', 'order_line.price_total')
 	def _compute_amounts(self):
 		super(Order, self)._compute_amounts()
-
-		def get_totals(line):
-			tax_results = self.env['account.tax']._compute_taxes([line._convert_to_tax_base_line_dict_with_invoiced_qty()])
-			totals = list(tax_results['totals'].values())[0]
-			return totals
-
-		for rec in self:
-			if rec.order_line:
-				rec.total_tasks = sum(rec.order_line[1::].mapped('price_subtotal'))
-				rec.total_invoiced_hours = sum(rec.order_line.mapped(
-					lambda l: get_totals(l)['amount_untaxed']
-				))
-				rec.left_to_invoice_hours = 0 if (rec.total_tasks - rec.total_invoiced_hours) < 0 else (rec.total_tasks - rec.total_invoiced_hours)
+		for order in self:
+			if order.order_line:
+				order.total_tasks = sum(order.order_line[1::].mapped('price_subtotal'))
+				order.total_invoiced_hours = sum(order.order_line.invoice_lines.mapped('move_id.amount_untaxed_signed'))
+				order.left_to_invoice_hours = 0 if (order.total_tasks - order.total_invoiced_hours) < 0 else (order.total_tasks - order.total_invoiced_hours)
+				order.amount_untaxed = order.left_to_invoice_hours
 			else:
-				rec.total_tasks = rec.total_invoiced_hours = rec.left_to_invoice_hours = 0
+				order.total_tasks = order.total_invoiced_hours = order.left_to_invoice_hours = 0
 
 	def action_invoice_subscription(self):
 		if self.is_subscription:
 			manual_invoice = self.env['account.move'].create({
+				'partner_id': self.partner_id.id,
 				'move_type': 'out_invoice',
 				'date': fields.Date.today(),
 				'sale_id': self.id,
