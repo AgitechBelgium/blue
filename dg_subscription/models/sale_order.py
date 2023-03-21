@@ -25,6 +25,11 @@ class Order(models.Model):
 	total_tasks = fields.Monetary(string="Total Tasks", store=True, compute='_compute_amounts', tracking=6)
 	total_invoiced_hours = fields.Monetary(string="Total Invoiced", store=True, compute='_compute_amounts', tracking=6)
 	left_to_invoice_hours = fields.Monetary(string="Left To Invoice", store=True, compute='_compute_amounts', tracking=8)
+	provision_invoiced = fields.Boolean(string="Provision Invoiced?", compute="_is_provision_invoiced")
+
+	def _is_provision_invoiced(self):
+		for rec in self:
+			rec.provision_invoiced = len(rec.invoice_ids.filtered('provision_invoice')) >= 4
 
 	def subscription_line_qty(self, sale_line_id=False):
 		"""
@@ -40,13 +45,15 @@ class Order(models.Model):
 
 	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.qty_invoiced', 'order_line.price_total')
 	def _compute_amounts(self):
-		super(Order, self)._compute_amounts()
 		for order in self:
 			if order.order_line:
+				order_lines = order.order_line.filtered(lambda x: not x.display_type)
 				order.total_tasks = sum(order.order_line[1::].mapped('price_subtotal'))
 				order.total_invoiced_hours = sum(order.order_line.invoice_lines.mapped('move_id.amount_untaxed_signed'))
 				order.left_to_invoice_hours = 0 if (order.total_tasks - order.total_invoiced_hours) < 0 else (order.total_tasks - order.total_invoiced_hours)
 				order.amount_untaxed = order.left_to_invoice_hours
+				order.amount_tax = sum(order_lines.mapped('price_tax'))
+				order.amount_total = sum(order_lines.mapped('price_total'))
 			else:
 				order.total_tasks = order.total_invoiced_hours = order.left_to_invoice_hours = 0
 
@@ -142,7 +149,8 @@ class Order(models.Model):
 		for rec in self:
 			for move in account_move:
 				move.sudo().with_context(check_move_validity=False).write({
-					'invoice_date': rec.next_quarterly_invoice_date
+					'invoice_date': rec.next_quarterly_invoice_date,
+					'provision_invoice': True,
 				})
 				rec.next_quarterly_invoice_date = (rec.next_quarterly_invoice_date or rec.date_order) + relativedelta(months=3)
 		# Forcefully computed amounts
