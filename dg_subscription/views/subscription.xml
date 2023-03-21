@@ -15,6 +15,7 @@
 				<attribute name="attrs">{'invisible': ['|', '|', ('show_rec_invoice_button', '=', False),  ('invoice_count', '=', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
 			</button>
 			<button id="create_recurring_invoice" position="after">
+				<field name="provision_invoiced" invisible="1"/>
 				<button name="action_provision_invoice_subscription" string="Provision Invoice"
                         id="create_provision_recurring_invoice" class="btn-primary" type="object" data-hotkey="p"
                          attrs="{'invisible': ['|', ('state', 'not in', ['sale']), ('invoice_status', '=', 'invoiced')]}"
