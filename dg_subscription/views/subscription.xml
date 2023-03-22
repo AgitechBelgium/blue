@@ -9,10 +9,10 @@
 				<field name="next_quarterly_invoice_date" string="Next Quarterly Invoice Date"/>
 			</field>
 			<button id="create_recurring_invoice_primary" position="attributes">
-				<attribute name="attrs">{'invisible': ['|', '|', ('show_rec_invoice_button', '=', False), ('invoice_count', '>', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
+				<attribute name="attrs">{'invisible': ['|', '|', '|', ('left_to_invoice_hours', '=', 0), ('show_rec_invoice_button', '=', False), ('invoice_count', '>', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
 			</button>
 			<button id="create_recurring_invoice" position="attributes">
-				<attribute name="attrs">{'invisible': ['|', '|', ('show_rec_invoice_button', '=', False),  ('invoice_count', '=', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
+				<attribute name="attrs">{'invisible': ['|', '|', '|', ('left_to_invoice_hours', '=', 0), ('show_rec_invoice_button', '=', False),  ('invoice_count', '=', 0), ('invoice_status', '=', 'invoiced')]}</attribute>
 			</button>
 			<button id="create_recurring_invoice" position="after">
 				<field name="provision_invoiced" invisible="1"/>
@@ -28,6 +28,7 @@
                     <field name="left_to_invoice_hours" widget="monetary" colspan="2" readonly="1"/>
                 </group>
 			</xpath>
+			<xpath expr="//notebook//page[@name='order_lines']//group[@name='note_group']//group[@name='sale_total']" position="replace"/>
 		</field>
 	</record>
 </odoo>

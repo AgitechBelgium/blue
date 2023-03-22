@@ -14,4 +14,4 @@ class Tax(models.Model):
             reduced_d = defaultdict(list, {k: v for k, v in tax_totals['groups_by_subtotal'].items() if 'Untaxed' not in k})
             tax_totals['groups_by_subtotal'] = reduced_d
         tax_totals['subtotals_order'] = list(filter(lambda z: 'Untaxed' not in z, tax_totals['subtotals_order']))
-        return tax_totals
+        return {}
