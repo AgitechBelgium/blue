@@ -16,11 +16,11 @@
         'data/cron.xml',
         'views/subscription.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'dg_subscription/static/src/xml/**',
-        ],
-    },
+    # 'assets': {
+    #     'web.assets_backend': [
+    #         'dg_subscription/static/src/xml/**',
+    #     ],
+    # },
     'license': 'LGPL-3',
     'demo': [
     ],

@@ -69,7 +69,7 @@ class Order(models.Model):
 						'name': 'Left To invoice',
 						'quantity': 1.0,
 						'price_unit': self.left_to_invoice_hours,
-						'tax_ids': [(6, 0, [])],
+						'tax_ids': [(6, 0, self.env.user.company_id.account_sale_tax_id.ids)],
 					}),
 				],
 			})
