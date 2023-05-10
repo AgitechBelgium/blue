@@ -145,20 +145,21 @@ class Order(models.Model):
 
 	def action_provision_invoice_subscription(self):
 		quarter_first_date, quarter_last_date = get_current_quarter_dates()
-		account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=False)
-		for rec in self:
-			for move in account_move:
-				move.sudo().with_context(check_move_validity=False).write({
-					'invoice_date': rec.next_quarterly_invoice_date,
-					'provision_invoice': True,
-				})
-				rec.next_quarterly_invoice_date = (rec.next_quarterly_invoice_date or rec.date_order) + relativedelta(months=3)
-		# Forcefully computed amounts
-		self._compute_amounts()
-		if account_move:
-			return self.action_view_invoice()
-		else:
-			raise UserError(self._nothing_to_invoice_error_message())
+		if self.get_remaining_quarter():
+			account_move = self.create_quarterly_invoice(self, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=False)
+			for rec in self:
+				for move in account_move:
+					move.sudo().with_context(check_move_validity=False).write({
+						'invoice_date': rec.next_quarterly_invoice_date,
+						'provision_invoice': True,
+					})
+					rec.next_quarterly_invoice_date = (rec.next_quarterly_invoice_date or rec.date_order) + relativedelta(months=3)
+			# Forcefully computed amounts
+			self._compute_amounts()
+			if account_move:
+				return self.action_view_invoice()
+			else:
+				raise UserError(self._nothing_to_invoice_error_message())
 
 	@api.model
 	def cron_dg_subscription_generate_invoices_quarterly(self):
@@ -180,10 +181,11 @@ class Order(models.Model):
 			# if order.invoice_ids.filtered(lambda x: quarter_first_date <= x.invoice_date <= quarter_last_date):
 			# 	continue
 			# else:
-			self.create_quarterly_invoice(order=order, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=True)
-			for move in order.invoice_ids:
-				move.sudo().with_context(check_move_validity=False).write({
-					'invoice_date': order.next_quarterly_invoice_date
-				})
-				order.next_quarterly_invoice_date = (order.next_quarterly_invoice_date or order.date_order) + relativedelta(months=3)
-			self.env.cr.commit()
+			if self.get_remaining_quarter():
+				self.create_quarterly_invoice(order=order, quarter_first_date=quarter_first_date, quarter_last_date=quarter_last_date, auto_commit=True)
+				for move in order.invoice_ids:
+					move.sudo().with_context(check_move_validity=False).write({
+						'invoice_date': order.next_quarterly_invoice_date
+					})
+					order.next_quarterly_invoice_date = (order.next_quarterly_invoice_date or order.date_order) + relativedelta(months=3)
+				self.env.cr.commit()
