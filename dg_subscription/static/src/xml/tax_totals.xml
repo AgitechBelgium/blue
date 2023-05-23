@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+	<t t-inherit="account.TaxTotalsField" t-inherit-mode="extension" owl="1">
+		<xpath expr="//table" position="attributes">
+			<attribute name="t-if">Object.keys(totals).length > 0</attribute>
+		</xpath>
+		<xpath expr="//t[@t-key='taxGroup.group_key']" position="replace">
+			<t t-if="subtotal['name'] in totals.groups_by_subtotal">
+				<t t-foreach="totals.groups_by_subtotal[subtotal['name']]" t-as="taxGroup" t-key="taxGroup.group_key">
+                    <TaxGroupComponent
+                        currency="currency"
+                        taxGroup="taxGroup"
+                        isReadonly="readonly"
+                        onChangeTaxGroup.bind="_onChangeTaxValueByTaxGroup"
+                        invalidate.bind="invalidate"
+                    />
+                </t>
+			</t>
+		</xpath>
+	</t>
+</templates>

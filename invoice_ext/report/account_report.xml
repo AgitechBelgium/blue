@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="account.account_invoices" model="ir.actions.report">
+            <field name="report_name">invoice_ext.report_invoice_facture_diego</field>
+            <field name="report_file">invoice_ext.report_invoice_facture_diego</field>
+            <field name="paperformat_id" ref="invoice_ext.paperformat_facture_invoice"/>
+        </record>
+    </data>
+</odoo>
