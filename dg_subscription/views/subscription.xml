@@ -18,7 +18,7 @@
 				<field name="provision_invoiced" invisible="1"/>
 				<button name="action_provision_invoice_subscription" string="Provision Invoice"
                         id="create_provision_recurring_invoice" class="btn-primary" type="object" data-hotkey="p"
-                         attrs="{'invisible': ['|', ('state', 'not in', ['sale']), ('invoice_status', '=', 'invoiced')]}"
+                         attrs="{'invisible': ['|', '|', ('state', 'not in', ['sale']), ('invoice_status', '=', 'invoiced'), ('provision_invoiced', '=', True)]}"
                 />
 			</button>
 			<xpath expr="//notebook//page[@name='order_lines']//group[@name='note_group']//group[@name='sale_total']" position="before">
