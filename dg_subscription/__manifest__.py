@@ -15,12 +15,8 @@
     'data': [
         'data/cron.xml',
         'views/subscription.xml',
+        'views/product_template.xml',
     ],
-    # 'assets': {
-    #     'web.assets_backend': [
-    #         'dg_subscription/static/src/xml/**',
-    #     ],
-    # },
     'license': 'LGPL-3',
     'demo': [
     ],

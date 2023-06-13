@@ -6,7 +6,7 @@ from odoo import fields, models, api, _, Command
 class SaleOrderLine(models.Model):
 	_inherit = "sale.order.line"
 
-	is_provision = fields.Boolean(string="Is Provision?", default=False)
+	is_provision = fields.Boolean(string="Is Provision?", related="product_id.is_provision", store=True)
 
 	@api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity')
 	def _compute_qty_invoiced(self):

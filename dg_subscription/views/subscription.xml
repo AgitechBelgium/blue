@@ -30,7 +30,7 @@
 			</xpath>
 			<xpath expr="//notebook//page[@name='order_lines']//group[@name='note_group']//group[@name='sale_total']" position="replace"/>
 			<xpath expr="//notebook//page[@name='order_lines']//field[@name='order_line']//tree//field" position="before">
-				<field name="is_provision" />
+				<field name="is_provision" invisible="1"/>
 			</xpath>
 		</field>
 	</record>
