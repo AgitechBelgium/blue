@@ -74,7 +74,7 @@ class Order(models.Model):
 				],
 			})
 			if manual_invoice:
-				for line in self.order_line[1::]:
+				for line in self.order_line.filtered(lambda ol: ol.is_provision):
 					line.invoice_lines = [(4, inv_line_id.id) for inv_line_id in manual_invoice.invoice_line_ids]
 				# Forcefully computed invoiced quantity
 				self.order_line._compute_qty_invoiced()
@@ -111,7 +111,9 @@ class Order(models.Model):
 	def _get_invoiceable_lines(self, final=False):
 		invoiceable_lines = super(Order, self)._get_invoiceable_lines(final)
 		if self._context.get('provision_invoice', False) and invoiceable_lines:
-			invoiceable_lines = invoiceable_lines[0]
+			invoiceable_lines = invoiceable_lines.filtered(lambda il: il.is_provision)
+		elif not self._context.get('provision_invoice', False) and invoiceable_lines and self.provision_invoiced:
+			invoiceable_lines = invoiceable_lines.filtered(lambda sl: not sl.is_provision)
 		return invoiceable_lines
 
 	def create_quarterly_invoice(self, order, quarter_first_date, quarter_last_date, auto_commit=False):
