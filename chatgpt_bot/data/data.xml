@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="partner_chatgpt_bot" model="res.partner">
+            <field name="name">ChatGPT Bot</field>
+            <field name="email">chatgptbot@example.com</field>
+            <field name="image_1920" type="base64" file="chatgpt_bot/static/src/img/chatgpt.png"/>
+            <field name="active" eval="False"/>
+        </record>
+
+
+        <record model="res.users" id="chatgpt_bot.user_chatgpt_bot">
+            <field name="name">ChatGPT Bot</field>
+            <field name="login">chatgpt</field>
+            <field name="password"></field>
+            <field name="partner_id" ref="chatgpt_bot.partner_chatgpt_bot"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="company_ids" eval="[Command.link(ref('base.main_company'))]"/>
+            <field name="email">chatgptbot@example.com</field>
+            <field name="signature"><![CDATA[<span>-- <br/>ChatGPT Bot</span>]]></field>
+            <field name="active" eval="False"/>
+        </record>
+
+
+        <!--        <record model="mail.channel" id="channel_chatgpt_bot">-->
+        <!--            <field name="name">ChatGPT Bot</field>-->
+        <!--            <field name="description">Connect with ChatGPT</field>-->
+        <!--        </record>-->
+
+
+        <!--        <record model="mail.message" id="mail_message_chatgpt">-->
+        <!--            <field name="model">mail.channel</field>-->
+        <!--            <field name="res_id" ref="chatgpt_bot.channel_chatgpt_bot"/>-->
+        <!--            <field name="message_type">comment</field>-->
+        <!--            <field name="subtype_id" ref="mail.mt_comment"/>-->
+        <!--            <field name="author_id" ref="chatgpt_bot.partner_chatgpt_bot"/>-->
+        <!--            <field name="subject">Welcome to ChatGPT!</field>-->
+        <!--            <field name="body"><![CDATA[<p>Welcome to the ChatGPT Bot channel.</p>-->
+        <!--            <p>This channel is accessible to all users to communicate with Chatgpt.</p>]]></field>-->
+        <!--        </record>-->
+
+        <!--        <record model="mail.channel.member" id="channel_member_chatgpt_bot">-->
+        <!--            <field name="partner_id" ref="chatgpt_bot.partner_chatgpt_bot"/>-->
+        <!--            <field name="channel_id" ref="chatgpt_bot.channel_chatgpt_bot"/>-->
+        <!--            <field name="fetched_message_id" ref="chatgpt_bot.mail_message_chatgpt"/>-->
+        <!--            <field name="seen_message_id" ref="chatgpt_bot.mail_message_chatgpt"/>-->
+        <!--        </record>-->
+
+
+        <!--        <record model="mail.channel" id="chatgpt_bot.channel_chatgpt_bot">-->
+        <!--            <field name="channel_member_ids" model="res.partner" eval="[(5,0,0),(0,0, {-->
+        <!--                    'partner_id': ref('chatgpt_bot.partner_chatgpt_bot'),-->
+        <!--                    'channel_id': ref('chatgpt_bot.channel_chatgpt_bot'),-->
+        <!--                }),(0,0, {-->
+        <!--                    'partner_id': obj().env.user.partner_id.id,-->
+        <!--                    'channel_id':  ref('chatgpt_bot.channel_chatgpt_bot'),-->
+        <!--                })]"/>-->
+        <!--        </record>-->
+
+
+    </data>
+</odoo>
