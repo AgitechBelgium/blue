@@ -25,7 +25,7 @@
 				<div t-attf-class="header o_company_#{company.id}_layout mb-5" t-att-style="report_header_style">
 					<div class="row">
 						<div class="col-3 mb4">
-							<img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 100px;" alt="Logo"/>
+							<img t-if="company.logo"  src="invoice_ext/static/img/BR-bleu.jpeg" style="max-height: 100px;" alt="Logo"/>
 						</div>
 						<div class="col-9 text-end" style="margin-top:22px;" t-field="company.report_header" name="moto"/>
 					</div>
