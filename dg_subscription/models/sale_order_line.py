@@ -6,6 +6,8 @@ from odoo import fields, models, api, _, Command
 class SaleOrderLine(models.Model):
 	_inherit = "sale.order.line"
 
+	is_provision = fields.Boolean(string="Is Provision?", related="product_id.is_provision", store=True)
+
 	@api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity')
 	def _compute_qty_invoiced(self):
 		super(SaleOrderLine, self)._compute_qty_invoiced()
@@ -39,7 +41,7 @@ class SaleOrderLine(models.Model):
 		:param optional_values: any parameter that should be added to the returned invoice line
 		:rtype: dict
 		"""
-		first_product = self.id == self.order_id.order_line[0].id if self.order_id.order_line else False
+		provision_lines = self.id in self.order_id.order_line.filtered(lambda ol: ol.is_provision).ids if self.order_id.order_line else False
 		self.ensure_one()
 		res = {
 			'display_type': self.display_type or 'product',
@@ -47,7 +49,7 @@ class SaleOrderLine(models.Model):
 			'name': self.name,
 			'product_id': self.product_id.id,
 			'product_uom_id': self.product_uom.id,
-			'quantity': self.product_uom_qty/4 if first_product and not self._context.get('force_super', False) else (self.product_uom_qty - self.qty_invoiced),
+			'quantity': self.product_uom_qty/4 if provision_lines and not self._context.get('force_super', False) else (self.product_uom_qty - self.qty_invoiced),
 			'discount': self.discount,
 			'price_unit': self.price_unit,
 			'tax_ids': [Command.set(self.tax_id.ids)],
