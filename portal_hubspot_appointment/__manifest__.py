@@ -7,6 +7,7 @@
 	'depends': ['base', 'web', 'portal'],
 	'data': [
 		'views/hubspot_template.xml',
-	]
+	],
+	'license': 'LGPL-3',
 }
 
