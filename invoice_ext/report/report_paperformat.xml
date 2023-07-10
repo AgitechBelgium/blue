@@ -14,6 +14,6 @@
         <field name="margin_left">7</field>
         <field name="margin_right">7</field>
         <field name="dpi">120</field>
-        <field name="header_spacing">40</field>
+        <field name="header_spacing">30</field>
     </record>
 </odoo>

@@ -10,7 +10,7 @@ var FidManagerWidget = Widget.extend({
        this.do_action({
             type: 'ir.actions.act_url',
             target: 'new',
-            url: 'https://fiskcouncil.fid-manager.be/fr',
+            url: 'https://blue-rock.fid-manager.be/fr/Job#/job/1/33/2021/3',
        });
    },
 });
