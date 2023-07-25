@@ -49,7 +49,7 @@ class Order(models.Model):
 			if order.order_line:
 				order_lines = order.order_line.filtered(lambda x: not x.display_type)
 				order.total_tasks = sum(order.order_line.filtered(lambda ol: not ol.product_id.is_provision).mapped('price_subtotal'))
-				order.total_invoiced_hours = sum(order.order_line.filtered(lambda olp: olp.product_id.computed_in_total_invoice).invoice_lines.mapped('move_id.amount_untaxed_signed'))
+				order.total_invoiced_hours = sum(order.order_line.filtered(lambda olp: olp.product_id.computed_in_total_invoice).invoice_lines.mapped('price_subtotal'))
 				order.left_to_invoice_hours = 0 if (order.total_tasks - order.total_invoiced_hours) < 0 else (order.total_tasks - order.total_invoiced_hours)
 				order.amount_untaxed = order.left_to_invoice_hours
 				order.amount_tax = sum(order_lines.mapped('price_tax'))
