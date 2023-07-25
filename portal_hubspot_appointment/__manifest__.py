@@ -9,4 +9,3 @@
 		'views/hubspot_template.xml',
 	]
 }
-
