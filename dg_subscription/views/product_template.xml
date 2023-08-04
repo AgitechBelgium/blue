@@ -12,7 +12,7 @@
 				</span>
 				<span class="d-inline-block">
 					<field name="computed_in_total_invoice"/>
-					<label for="computed_in_total_invoice"/>
+					<label for="computed_in_total_invoice" string="Computed Total Budget"/>
 				</span>
 			</xpath>
 		</field>
