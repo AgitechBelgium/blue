@@ -2,7 +2,7 @@
 
 {
     'name': 'Dg Subscriptions',
-    'version': '15.0.1.0.6',
+    'version': '15.0.1.0.7',
     'category': 'Sales/Subscriptions',
     'sequence': 116,
     'summary': 'Generate recurring invoices based on the financial year',
@@ -16,6 +16,7 @@
         'data/cron.xml',
         'views/subscription.xml',
         'views/product_template.xml',
+        'views/subscription_templates.xml',
     ],
     'license': 'LGPL-3',
     'demo': [
