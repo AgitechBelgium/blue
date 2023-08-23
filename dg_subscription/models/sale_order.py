@@ -23,7 +23,7 @@ class Order(models.Model):
 
 	next_quarterly_invoice_date = fields.Date(string="Next Date", default=fields.Date.today)
 	total_tasks = fields.Monetary(string="Total Tasks", store=True, compute='_compute_amounts', tracking=6)
-	total_invoiced_hours = fields.Monetary(string="Total Invoiced", store=True, compute='_compute_amounts', tracking=6)
+	total_invoiced_hours = fields.Monetary(string="Total Budget", store=True, compute='_compute_amounts', tracking=6)
 	left_to_invoice_hours = fields.Monetary(string="Left To Invoice", store=True, compute='_compute_amounts', tracking=8)
 	provision_invoiced = fields.Boolean(string="Provision Invoiced?", compute="_is_provision_invoiced")
 
@@ -47,9 +47,11 @@ class Order(models.Model):
 	def _compute_amounts(self):
 		for order in self:
 			if order.order_line:
+				invoice_lines = order.order_line.filtered(lambda olp: olp.product_id.computed_in_total_invoice).invoice_lines
 				order_lines = order.order_line.filtered(lambda x: not x.display_type)
 				order.total_tasks = sum(order.order_line.filtered(lambda ol: not ol.product_id.is_provision).mapped('price_subtotal'))
-				order.total_invoiced_hours = sum(order.order_line.invoice_lines.mapped('move_id.amount_untaxed_signed'))
+				order.total_invoiced_hours = sum(invoice_lines.filtered(lambda il: il.move_id.move_type == 'out_invoice').mapped('price_subtotal')) -\
+					sum(invoice_lines.filtered(lambda il: il.move_id.move_type == 'out_refund').mapped('price_subtotal'))
 				order.left_to_invoice_hours = 0 if (order.total_tasks - order.total_invoiced_hours) < 0 else (order.total_tasks - order.total_invoiced_hours)
 				order.amount_untaxed = order.left_to_invoice_hours
 				order.amount_tax = sum(order_lines.mapped('price_tax'))
