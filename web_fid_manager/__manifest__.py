@@ -14,4 +14,5 @@
 			'web_fid_manager/static/src/xml/fid_systray.xml',
 		},
 	},
+	'license': 'LGPL-3',
 }
