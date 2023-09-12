@@ -1,3 +1,5 @@
+import calendar
+
 from dateutil.relativedelta import relativedelta
 from odoo import fields, api, models, _
 from datetime import datetime, timedelta
@@ -7,9 +9,11 @@ import pytz
 
 def get_current_quarter_dates():
 	current_date = datetime.now()
-	current_quarter = round((current_date.month - 1) / 3 + 1)
+	current_quarter = int((current_date.month - 1) / 3 + 1)
 	first_date = datetime(current_date.year, 3 * current_quarter - 2, 1)
-	last_date = datetime(current_date.year, 3 * current_quarter + 1, 1) + timedelta(days=-1)
+	# last_date = datetime(current_date.year, 3 * current_quarter + 1, 1) + timedelta(days=-1)
+	last_day = calendar.monthrange(current_date.year, 3 * current_quarter)[1]
+	last_date = datetime(current_date.year, (3 * current_quarter), last_day)
 	return first_date.date(), last_date.date()
 
 
@@ -40,7 +44,8 @@ class Order(models.Model):
 		sale_line_ids = sale_line_id or timesheet_ids.mapped('so_line')
 		for sale_line in sale_line_ids:
 			sale_line.write({
-				'product_uom_qty': sum(timesheet_ids.filtered(lambda t: t.so_line.id == sale_line.id).mapped('unit_amount'))
+				'product_uom_qty': sale_line.qty_delivered
+				# 'product_uom_qty': sum(timesheet_ids.filtered(lambda t: t.so_line.id == sale_line.id).mapped('unit_amount'))
 			})
 
 	@api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.qty_invoiced', 'order_line.price_total')
