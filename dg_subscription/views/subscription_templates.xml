@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_subscription_invoice_template" name="Portal layout : Subscription Layout" inherit_id="sale_subscription.subscription">
+		<xpath expr="//div[hasclass('card-body')]//div[hasclass('row')][2]//div[@id='total']" position="replace"/>
+    </template>
+</odoo>
