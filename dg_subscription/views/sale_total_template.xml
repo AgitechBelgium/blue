@@ -9,7 +9,7 @@
                         <strong>Total Time</strong>
                     </td>
                     <td class="text-end">
-                        <span t-esc="sale.total_tasks"/>
+                        <span t-field="sale.total_tasks"/>
                     </td>
                 </tr>
                 <tr class="border-black">
@@ -17,7 +17,7 @@
                         <strong>Total Budget</strong>
                     </td>
                     <td class="text-end">
-                        <span t-esc="sale.total_invoiced_hours"/>
+                        <span t-field="sale.total_invoiced_hours" t-options='{"widget": "monetary"}'/>
                     </td>
                 </tr>
                 <tr class="border-black">
@@ -25,7 +25,7 @@
                         <strong>Left To Invoice</strong>
                     </td>
                     <td class="text-end">
-                        <span t-esc="sale.left_to_invoice_hours"/>
+                        <span t-field="sale.left_to_invoice_hours" t-options='{"widget": "monetary"}'/>
                     </td>
                 </tr>
             </table>
