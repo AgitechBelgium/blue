@@ -2,7 +2,7 @@
 
 {
     'name': 'Dg Subscriptions',
-    'version': '16.0.1.0.1',
+    'version': '16.0.1.0.2',
     'category': 'Sales/Subscriptions',
     'sequence': 116,
     'summary': 'Generate recurring invoices based on the financial year',
