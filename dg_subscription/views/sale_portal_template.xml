@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-		<template id="sale_order_portal_template_total_inherit" name="Custom total Sales Portal Template" inherit_id="sale.sale_order_portal_content">
-			   <xpath expr="//section[@id='details']//div[@id='total']" position="replace"/>
-		</template>
-	</data>
+        <template id="sale_order_portal_template_total_inherit" name="Custom total Sales Portal Template"
+                  inherit_id="sale.sale_order_portal_content">
+            <xpath expr="//section[@id='details']//div[@id='total']" position="replace">
+                <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto">
+                    <t t-call="dg_subscription.document_totals_template"/>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="sale_order_portal_template_inherit" name="Custom Remove total"
+                  inherit_id="sale.sale_order_portal_template">
+            <xpath expr="//t[@t-set='title']" position="replace"/>
+        </template>
+
+    </data>
 </odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="document_totals_template">
+            <table class="table table-sm">
+                <t t-set="sale" t-value="sale_order"/>
+                <tr class="border-black">
+                    <td>
+                        <strong>Total Time</strong>
+                    </td>
+                    <td class="text-end">
+                        <span t-esc="sale.total_tasks"/>
+                    </td>
+                </tr>
+                <tr class="border-black">
+                    <td>
+                        <span>Total Budget</span>
+                    </td>
+                    <td class="text-end">
+                        <span t-esc="sale.total_invoiced_hours"/>
+                    </td>
+                </tr>
+                <tr class="border-black">
+                    <td>
+                        <span>Left To Invoice</span>
+                    </td>
+                    <td class="text-end">
+                        <span t-esc="sale.left_to_invoice_hours"/>
+                    </td>
+                </tr>
+            </table>
+        </template>
+    </data>
+</odoo>
