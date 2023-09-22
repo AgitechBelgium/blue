@@ -14,7 +14,7 @@
                 </tr>
                 <tr class="border-black">
                     <td>
-                        <span>Total Budget</span>
+                        <strong>Total Budget</strong>
                     </td>
                     <td class="text-end">
                         <span t-esc="sale.total_invoiced_hours"/>
@@ -22,7 +22,7 @@
                 </tr>
                 <tr class="border-black">
                     <td>
-                        <span>Left To Invoice</span>
+                        <strong>Left To Invoice</strong>
                     </td>
                     <td class="text-end">
                         <span t-esc="sale.left_to_invoice_hours"/>
